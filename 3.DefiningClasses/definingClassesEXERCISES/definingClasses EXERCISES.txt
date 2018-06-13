@@ -1,0 +1,1363 @@
+1.	Define Class Person
+
+
+import java.lang.reflect.Field;
+
+public class _1_DefineClassPerson {
+    public static void main(String[] args) {
+        Class person=Person.class;
+
+        Field[] fields=person.getDeclaredFields();
+        System.out.println(fields.length);
+    }
+}
+class Person {
+    private String name;
+    private  int age;
+}
+
+2.	Creating Constructors
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+
+public class _1_DefineClassPerson {
+    public static void main(String[] args)throws Exception  {
+
+        InputStreamReader inpStr=new InputStreamReader(System.in);
+        BufferedReader reader=new BufferedReader(inpStr);
+
+        Class person=Person.class;
+
+        Constructor emptyCtor=person.getDeclaredConstructor();
+        Constructor ageCtor=person.getDeclaredConstructor(int.class);
+        Constructor nameAgeCtor=person.getDeclaredConstructor(String.class,int.class);
+
+        String name =reader.readLine();
+        int age=Integer.parseInt(reader.readLine());
+
+        Person basePerson=(Person) emptyCtor.newInstance();
+
+        Person personWithAge=(Person) ageCtor.newInstance(age);
+
+        Person fullPerson=(Person) nameAgeCtor.newInstance(name,age);
+
+        System.out.printf("%s %s%n",basePerson.getName(),basePerson.getAge());
+        System.out.printf("%s %s%n",personWithAge.getName(),personWithAge.getAge());
+        System.out.printf("%s %s%n",fullPerson.getName(),fullPerson.getAge());
+
+    }
+}
+class Person {
+    private String name;
+    private  int age;
+
+    public Person() {
+        this.name="No name";
+        this.age=1;
+    }
+
+    public Person(int age) {
+        this.name="No name";
+        this.age = age;
+    }
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+
+3.	Opinion Poll
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+public class _1_DefineClassPerson {
+    public static void main(String[] args)throws Exception  {
+
+        InputStreamReader inpStr=new InputStreamReader(System.in);
+        BufferedReader reader=new BufferedReader(inpStr);
+
+        int n=Integer.parseInt(reader.readLine());
+        List<Person> persons=new ArrayList<>();
+
+        for(int i=0; i<n; i++){
+            String[] tokens=reader.readLine().split(" ");
+
+                String curname=tokens[0];
+                int curAge=Integer.parseInt(tokens[1]);
+                persons.add(new Person(curname,curAge));
+
+        }
+
+        persons.stream()
+                .filter(x->x.getAge()>30)
+                .sorted(Comparator.comparing(Person::getName))
+                .forEach(pers-> System.out.printf("%s - %d%n",pers.getName(),pers.getAge()));
+        
+    }
+}
+class Person {
+    private String name;
+    private  int age;
+
+    public Person() {
+        this.name="No name";
+        this.age=1;
+    }
+
+    public Person(int age) {
+        this.name="No name";
+        this.age = age;
+    }
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+
+4.	Company Roster
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.*;
+
+public class _1_DefineClassPerson {
+    public static void main(String[] args)throws Exception  {
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        int n=Integer.parseInt(reader.readLine());
+
+        LinkedHashMap<String,List<Employee>> depts=new LinkedHashMap<>();
+
+        for(int i=0; i<n; i++){
+            String input=reader.readLine();
+
+            String[] tokens=input.split("\\s+");
+
+                String curName=tokens[0];
+                double curSal=Double.parseDouble(tokens[1]);
+                String curPos=tokens[2];
+                String curDep=tokens[3];
+                Employee curEmp=new Employee(curName,curSal,curPos,curDep);
+
+                if(tokens.length==5){
+                    if(tokens[4].contains("@")) {
+                        curEmp.setEmail(tokens[4]);
+                    }else {
+                        curEmp.setAge(Integer.parseInt(tokens[4]));
+                    }
+
+                }else if(tokens.length==6){
+                    curEmp.setEmail(tokens[4]);
+                    curEmp.setAge(Integer.parseInt(tokens[5]));
+                }
+
+                if(depts.containsKey(curEmp.getDepartement())==false){
+                    depts.put(curEmp.getDepartement(),new ArrayList<>());
+                }
+                depts.get(curEmp.getDepartement()).add(curEmp);
+        }
+
+        depts.entrySet().stream()
+                .sorted((x,y)->{
+
+                    double xAver=x.getValue().stream()
+                            .mapToDouble(s->s.getSalary())
+                            .average().getAsDouble();
+
+                    double yAver=y.getValue().stream()
+                            .mapToDouble(s->s.getSalary())
+                            .average().getAsDouble();
+
+                    return Double.compare(yAver,xAver);
+                })
+                .limit(1)
+                .forEach(kv->{
+                    System.out.printf("Highest Average Salary: %s%n",kv.getKey());
+                    kv.getValue().stream()
+                            .sorted((a,b)->{
+                                return Double.compare(b.getSalary(),a.getSalary());
+                            })
+                            .forEach(emp->{
+                                System.out.printf("%s %.2f %s %d%n",
+                                        emp.getName(),emp.getSalary(),emp.getEmail(),emp.getAge());
+                            });
+                });
+
+    }
+}
+class Departement{
+    String name;
+    List<Employee> employees;
+
+    public Departement(String name) {
+        this.name = name;
+        this.employees = new ArrayList<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Employee> getEmployees() {
+        return employees;
+    }
+
+    public void setEmployees(List<Employee> employees) {
+        this.employees = employees;
+    }
+}
+class Employee{
+    String name;
+    double salary;
+    String position;
+    String departement;
+    String email;
+    int age;
+
+
+
+    public Employee(String name, double salary, String position, String departement) {
+        this.name = name;
+        this.salary = salary;
+        this.position = position;
+        this.departement = departement;
+        this.email="n/a";
+        this.age = -1;
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(double salary) {
+        this.salary = salary;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public String getDepartement() {
+        return departement;
+    }
+
+    public void setDepartement(String departement) {
+        this.departement = departement;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+
+5.	* Speed Racing
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+public class _5_SpeedRacing {
+    public static void main(String[] args) throws IOException {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        int n= Integer.parseInt(reader.readLine());
+
+        List<Car> cars=new ArrayList<>();
+
+        for(int i=0; i<n; i++){
+            String[] tokens=reader.readLine().split("\\s+");
+            Car curCar=new Car(tokens[0],Double.parseDouble(tokens[1]),Double.parseDouble(tokens[2]));
+            cars.add(curCar);
+        }
+
+        String input=reader.readLine();
+
+        while ("End".equals(input)==false){
+
+            String[] tokens=input.split("\\s+");
+
+            String curModel=tokens[1];
+            double curKm=Double.parseDouble(tokens[2]);
+
+            cars.stream()
+                    .filter(x->x.getModel().equals(curModel))
+                    .forEach(car->{
+                        car.moveCar(curKm);
+                    });
+            input=reader.readLine();
+        }
+
+        for (Car car : cars) {
+            DecimalFormat df=new DecimalFormat("#.###");
+            String disFin=df.format(car.getDistance());
+            System.out.printf("%s %.2f %s%n",
+                    car.getModel(),car.getFuelAmount(),disFin);
+        }
+
+    }
+}
+class Car{
+
+    String model;
+    double fuelAmount;
+    double fuelCost;
+    double distance;
+
+    public Car(String model, double fuelAmount, double fuelCost) {
+        this.model = model;
+        this.fuelAmount = fuelAmount;
+        this.fuelCost = fuelCost;
+    }
+
+    public void moveCar(double kilometers){
+        double verbrauchtesBenzin=this.getFuelCost()*kilometers;
+
+        if(verbrauchtesBenzin>this.getFuelAmount()){
+            System.out.println("Insufficient fuel for the drive");
+        }else {
+            this.setFuelAmount(this.getFuelAmount()-verbrauchtesBenzin);
+            this.distance+=kilometers;
+        }
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public double getFuelAmount() {
+        return fuelAmount;
+    }
+
+    public double getFuelCost() {
+        return fuelCost;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setFuelAmount(double fuelAmount) {
+        this.fuelAmount = fuelAmount;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+}
+
+6.	 Raw Data
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class _6_RawData {
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        int n= Integer.parseInt(reader.readLine());
+
+        List<Car2> cars=new ArrayList<>();
+
+        for(int i=0; i<n; i++){
+
+            String[]tokens=reader.readLine().split("\\s+");
+            String model=tokens[0];
+            int engineSpeed=Integer.parseInt(tokens[1]);
+            int enginePower=Integer.parseInt(tokens[2]);
+            int cargoWeight=Integer.parseInt(tokens[3]);
+            String cargoType=tokens[4];
+            double tire1Pressure=Double.parseDouble(tokens[5]);
+            int tire1age=Integer.parseInt(tokens[6]);
+
+            double tire2Pressure=Double.parseDouble(tokens[7]);
+            int tire2age=Integer.parseInt(tokens[8]);
+
+            double tire3Pressure=Double.parseDouble(tokens[9]);
+            int tire3age=Integer.parseInt(tokens[10]);
+
+            double tire4Pressure=Double.parseDouble(tokens[11]);
+            int tire4age=Integer.parseInt(tokens[12]);
+
+            Engine curEngine=new Engine(engineSpeed,enginePower);
+            Cargo curCargo=new Cargo(cargoWeight,cargoType);
+
+            Tire tire1=new Tire(tire1Pressure,tire1age);
+            Tire tire2=new Tire(tire2Pressure,tire2age);
+            Tire tire3=new Tire(tire3Pressure,tire3age);
+            Tire tire4=new Tire(tire4Pressure,tire4age);
+
+            Tire[] curTires=new Tire[]{tire1,tire2,tire3,tire4};
+
+            Car2 curCar=new Car2(model,curEngine,curCargo,curTires);
+
+            cars.add(curCar);
+        }
+
+        if("fragile".equals(reader.readLine())){
+
+            cars.stream()
+                    .filter(x->x.getCargo().getType().equals("fragile"))
+                    .filter(y->{
+                       return Arrays.stream(y.getTires()).anyMatch(t->t.getPressure()<1);
+                    })
+                    .forEach(car->{
+                        System.out.println(car.getModel());
+                    });
+
+
+        }else {
+            cars.stream()
+                    .filter(x->x.getCargo().getType().equals("flamable")&&x.getEngine().getPower()>250)
+                    .forEach(car-> System.out.println(car.getModel()));
+
+        }
+    }
+}
+class Car2{
+
+    String model;
+    Engine engine;
+    Cargo cargo;
+    Tire[] tires;
+
+    public Car2(String model, Engine engine, Cargo cargo, Tire[] tires) {
+        this.model = model;
+        this.engine = engine;
+        this.cargo = cargo;
+        this.tires = tires;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public Engine getEngine() {
+        return engine;
+    }
+
+    public Cargo getCargo() {
+        return cargo;
+    }
+
+    public Tire[] getTires() {
+        return tires;
+    }
+}
+class Engine{
+    int speed;
+    int power;
+
+    public Engine(int speed, int power) {
+        this.speed = speed;
+        this.power = power;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public int getPower() {
+        return power;
+    }
+}
+class Cargo{
+    int weight;
+    String type;
+
+    public Cargo(int weight, String type) {
+        this.weight = weight;
+        this.type = type;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public String getType() {
+        return type;
+    }
+}
+class  Tire{
+    double pressure;
+    int age;
+
+    public Tire(double pressure, int age) {
+        this.pressure = pressure;
+        this.age = age;
+    }
+
+    public double getPressure() {
+        return pressure;
+    }
+
+    public int getAge() {
+        return age;
+    }
+}
+
+7.	Car Salesman
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class _7_CarSalesman {
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        int n= Integer.parseInt(reader.readLine());
+
+        List<Engine2> engines=new ArrayList<>();
+
+        for(int i=0; i<n; i++){
+            String[]tokens=reader.readLine().split("\\s+");
+
+            String model=tokens[0];
+            int power=Integer.parseInt(tokens[1]);
+
+            Engine2 curEngine=new Engine2(model,power);
+
+            if(tokens.length==3){
+                if(Character.isDigit(tokens[2].charAt(0))){
+                    curEngine.setDisplacement(Integer.parseInt(tokens[2]));
+                }else {
+                    curEngine.setEfficiency(tokens[2]);
+                }
+            }else if(tokens.length==4){
+                curEngine.setDisplacement(Integer.parseInt(tokens[2]));
+                curEngine.setEfficiency(tokens[3]);
+            }
+            engines.add(curEngine);
+        }
+
+        int m= Integer.parseInt(reader.readLine());
+
+        List<Car3> cars=new ArrayList<>();
+
+        for (int i = 0; i <m ; i++) {
+
+            String[]tokens=reader.readLine().split("\\s+");
+
+            String model=tokens[0];
+            List<Engine2> curEng=engines.stream()
+                    .filter(x->x.getModel().equals(tokens[1]))
+                    .limit(1)
+                    .collect(Collectors.toList());
+
+            Car3 curCar=new Car3(model,curEng.get(0));
+
+            if(tokens.length==3){
+                if(Character.isDigit(tokens[2].charAt(0))){
+                    curCar.setWeight(Integer.parseInt(tokens[2]));
+                }else {
+                    curCar.setColor(tokens[2]);
+                }
+            }else if(tokens.length==4){
+                curCar.setWeight(Integer.parseInt(tokens[2]));
+                curCar.setColor(tokens[3]);
+            }
+
+            cars.add(curCar);
+        }
+
+        for (Car3 car : cars) {
+            car.printCar();
+        }
+    }
+}
+class Car3{
+
+    String model;
+    Engine2 engine;
+    int weight;
+    String color;
+
+    public void printCar(){
+
+        System.out.println(this.model+":");
+        System.out.printf("%s:%n",this.engine.model);
+        System.out.printf("Power: %d%n",this.engine.power);
+
+        if(this.engine.displacement<=0){
+            System.out.println("Displacement: n/a");
+        }else {
+            System.out.printf("Displacement: %d%n",this.engine.displacement);
+        }
+        System.out.printf("Efficiency: %s%n",this.engine.efficiency);
+
+        if(this.weight<0){
+            System.out.println("Weight: n/a");
+        }else {
+            System.out.printf("Weight: %d%n",this.weight);
+        }
+        System.out.printf("Color: %s%n",this.color);
+
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public Car3(String model, Engine2 engine) {
+        this.model = model;
+        this.engine = engine;
+        this.weight=-1;
+        this.color="n/a";
+    }
+}
+class Engine2{
+    String model;
+    int power;
+    int displacement;
+    String efficiency;
+
+    public Engine2(String model, int power) {
+        this.model = model;
+        this.power = power;
+        this.displacement=-1;
+        this.efficiency="n/a";
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public int getPower() {
+        return power;
+    }
+
+    public int getDisplacement() {
+        return displacement;
+    }
+
+    public String getEfficiency() {
+        return efficiency;
+    }
+
+    public void setDisplacement(int displacement) {
+        this.displacement = displacement;
+    }
+
+    public void setEfficiency(String efficiency) {
+        this.efficiency = efficiency;
+    }
+}
+
+8.	Pokemon Trainer
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+public class _8_PokemonTrainer {
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        List<Trainer> trainers=new ArrayList<>();
+
+        String input=reader.readLine();
+
+        while ("Tournament".equals(input)==false){
+
+            String[]tokens=input.split("\\s+");
+
+            String curTrainName=tokens[0];
+            String curPokName=tokens[1];
+            String curPokElem=tokens[2];
+            int curPokHealt=Integer.parseInt(tokens[3]);
+            Pokemon curPok=new Pokemon(curPokName,curPokElem,curPokHealt);
+
+            if(trainers.stream()
+                    .anyMatch(x->x.getName().equals(curTrainName))==false){
+                Trainer curTr=new Trainer(curTrainName);
+                curTr.getPokemons().add(curPok);
+                trainers.add(curTr);
+
+            }else {
+                trainers.stream().filter(x->x.getName().equals(curTrainName))
+                        .forEach(t->t.getPokemons().add(curPok));
+            }
+            input=reader.readLine();
+        }
+        input=reader.readLine();
+
+        while ("End".equals(input)==false){
+
+            String curEl=input;
+            
+                for (Trainer trainer : trainers) {
+
+                    boolean hasMatch=trainer.getPokemons().stream()
+                            .anyMatch(x->x.element.equals(curEl)&&x.healt>0);
+                    if(hasMatch){
+                        trainer.setBadges(trainer.getBadges()+1);
+                    }else {
+                        trainer.getPokemons().stream()
+                                .forEach(p->{
+                                    p.setHealt(p.getHealt()-10);
+                                });
+                    }
+                }
+
+            input=reader.readLine();
+        }
+        trainers.stream()
+                .sorted((x,y)->{
+                    return Integer.compare(y.getBadges(),x.getBadges());
+                })
+                .forEach(tr->{
+                    tr.print();
+                });
+    }
+}
+class Trainer{
+    String name;
+    int badges;
+    List<Pokemon> pokemons;
+
+    public void  print(){
+        long livePokemons=this.getPokemons().stream()
+                .filter(x->x.getHealt()>0)
+                .count();
+        System.out.printf("%s %d %d%n",this.name,this.badges,livePokemons);
+    }
+
+    public Trainer(String name) {
+        this.name = name;
+        this.badges=0;
+        this.pokemons=new ArrayList<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getBadges() {
+        return badges;
+    }
+
+    public void setBadges(int badges) {
+        this.badges = badges;
+    }
+
+    public List<Pokemon> getPokemons() {
+        return pokemons;
+    }
+
+    public void setPokemons(List<Pokemon> pokemons) {
+        this.pokemons = pokemons;
+    }
+}
+class Pokemon{
+
+    String name;
+    String element;
+    int healt;
+
+    public Pokemon(String name, String element, int healt) {
+        this.name = name;
+        this.element = element;
+        this.healt = healt;
+    }
+    public String getName() {
+        return name;
+    }
+
+    public String getElement() {
+        return element;
+    }
+
+    public int getHealt() {
+        return healt;
+    }
+
+    public void setHealt(int healt) {
+        this.healt = healt;
+    }
+}
+
+9.	Google
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class _9_Google {
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        List<Person> persons=new ArrayList<>();
+
+        String input=reader.readLine();
+
+        while ("End".equals(input)==false){
+            String[] tokens=input.split("\\s+");
+            String curName=tokens[0];
+
+            boolean existCurPerson=persons.stream()
+                    .anyMatch(p->p.name.equals(curName));
+            if(existCurPerson==false){
+                persons.add(new Person(curName));
+            }
+            List<Person> curPersons=persons.stream().filter(x->x.name.equals(curName)).collect(Collectors.toList());
+
+            Person currUser=curPersons.get(0);
+
+            if(tokens.length==5){
+                String compName=tokens[2];
+                String departement=tokens[3];
+                double curSalary=Double.parseDouble(tokens[4]);
+
+                currUser.setCompany(new Company(compName,departement,curSalary));
+            }else{
+
+                switch (tokens[1]){
+
+                    case "pokemon":{
+                        String pokName=tokens[2];
+                        String pokType=tokens[3];
+                        boolean containsPokem=currUser.pokemons.stream()
+                                .anyMatch(p->p.name.equals(pokName)&&p.type.equals(pokType));
+                        if(containsPokem==false){
+                            currUser.pokemons.add(new Pokem(pokName,pokType));
+                        }
+                    }break;
+                    case "parents":{
+                        String parName=tokens[2];
+                        String parBirthday=tokens[3];
+                        boolean containsPar=currUser.parents.stream()
+                                .anyMatch(p->p.name.equals(parName)&&p.birthay.equals(parBirthday));
+                        if(containsPar==false){
+                            currUser.parents.add(new Parent(parName,parBirthday));
+                        }
+                    }break;
+                    case "children":{
+                        String chName=tokens[2];
+                        String chBirthday=tokens[3];
+
+                        boolean containsCh=currUser.children.stream()
+                                .anyMatch(p->p.name.equals(chName)&&p.birthay.equals(chBirthday));
+
+                        if(containsCh==false){
+                            currUser.children.add(new Child(chName,chBirthday));
+                        }
+                    }break;
+                    case "car":{
+                        String curCar=tokens[2]+" "+tokens[3];
+                        currUser.setCar(curCar);
+                    }break;
+
+                }
+            }
+            input=reader.readLine();
+        }
+
+        input=reader.readLine();
+        String wantedPerson=input;
+        persons.stream()
+                .filter(p->p.name.equals(wantedPerson))
+                .forEach(x->{
+                    System.out.println(x.name);
+                    System.out.println("Company:");
+                    if(x.company!=null){
+                        System.out.printf("%s %s %.2f%n",x.company.name
+                        ,x.company.departement,x.company.salary);
+                    }
+                    System.out.println("Car:");
+                    if(x.car.equals("")==false){
+                        System.out.printf("%s%n",x.car);
+                    }
+
+                    System.out.println("Pokemon:");
+                        x.pokemons.stream()
+                                .forEach(pok-> System.out.printf("%s %s%n",pok.name,pok.type));
+
+
+                    System.out.println("Parents:");
+                        x.parents.stream()
+                                .forEach(p-> System.out.printf("%s %s%n",p.name,p.birthay));
+
+
+                    System.out.println("Children:");
+                    x.children.stream()
+                            .forEach(ch-> System.out.printf("%s %s%n",ch.name,ch.birthay));
+
+
+                });
+
+    }
+}
+
+class Person{
+    String name;
+    String car;
+    Company company;
+    List<Pokem> pokemons;
+    List<Child> children;
+    List<Parent> parents;
+
+    public Person(String name) {
+        this.name = name;
+        this.car="";
+        this.pokemons=new ArrayList<>();
+        this.children=new ArrayList<>();
+        this.parents=new ArrayList<>();
+
+    }
+
+    public void setCar(String car) {
+        this.car = car;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
+    }
+}
+class Company{
+    String name;
+    String departement;
+    double salary;
+
+    public Company(String name, String departement, double salary) {
+        this.name = name;
+        this.departement = departement;
+        this.salary = salary;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDepartement(String departement) {
+        this.departement = departement;
+    }
+
+    public void setSalary(double salary) {
+        this.salary = salary;
+    }
+}
+class Child{
+    String name;
+    String birthay;
+
+    public Child(String name, String birthay) {
+        this.name = name;
+        this.birthay = birthay;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getBirthay() {
+        return birthay;
+    }
+}
+class Parent{
+    String name;
+    String birthay;
+
+    public Parent(String name, String birthay) {
+        this.name = name;
+        this.birthay = birthay;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getBirthay() {
+        return birthay;
+    }
+}
+class Pokem{
+    String name;
+    String type;
+
+    public Pokem(String name, String type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+}
+
+10.	*** Family Tree
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class _10_FamilyTree {
+    public static void main(String[] args) throws IOException {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        String wantedPerson=reader.readLine();
+
+        List<PersonFamily> persons=new ArrayList<>();
+
+        String input=reader.readLine();
+
+        while ("End".equals(input)==false){
+
+            if(input.contains("-")){
+                String[] tokens=input.split("\\s-\\s");
+                String parent=tokens[0];
+                String kind=tokens[1];
+
+                List<PersonFamily> curParent=persons.stream()
+                        .filter(x->x.birthay.equals(parent)||x.name.equals(parent)).collect(Collectors.toList());
+
+                if(curParent.isEmpty()){
+                    PersonFamily curNewParent=new PersonFamily();
+                    if(Character.isDigit(parent.charAt(0))){
+                        curNewParent.setBirthay(parent);
+                    }else {
+                        curNewParent.setName(parent);
+                    }
+                    curNewParent.children.add(kind);
+                    persons.add(curNewParent);
+                }else if(curParent.size()==1){
+                    PersonFamily curNewParent=curParent.get(0);
+                    curNewParent.children.add(kind);
+                }else {
+                    PersonFamily curFirstParent=curParent.get(0);
+                    PersonFamily curSecParent=curParent.get(1);
+                    if(curFirstParent.name.equals("")){
+                        curFirstParent.setName(curSecParent.name);
+                    }else {
+                        curFirstParent.setBirthay(curSecParent.birthay);
+                    }
+                    curFirstParent.parents.addAll(curSecParent.parents);
+                    curFirstParent.children.addAll(curSecParent.children);
+                    persons.remove(curSecParent);
+                }
+
+                List<PersonFamily> curKind=persons.stream()
+                        .filter(x->x.birthay.equals(kind)||x.name.equals(kind)).collect(Collectors.toList());
+
+                if(curKind.isEmpty()){
+                    PersonFamily curNewKind=new PersonFamily();
+                    if(Character.isDigit(kind.charAt(0))){
+                        curNewKind.setBirthay(kind);
+                    }else {
+                        curNewKind.setName(kind);
+                    }
+                    curNewKind.parents.add(parent);
+                    persons.add(curNewKind);
+                }else if(curKind.size()==1){
+                    PersonFamily curNewKind=curKind.get(0);
+                    curNewKind.parents.add(parent);
+                }else{
+                    PersonFamily curFirstKind=curKind.get(0);
+                    PersonFamily curSecKind=curKind.get(1);
+                    if(curFirstKind.name.equals("")){
+                        curFirstKind.setName(curSecKind.name);
+                    }else {
+                        curFirstKind.setBirthay(curSecKind.birthay);
+                    }
+                    curFirstKind.parents.addAll(curSecKind.parents);
+                    curFirstKind.children.addAll(curSecKind.children);
+                    persons.remove(curSecKind);
+                }
+
+            }else {
+                String[] tokens=input.split("\\s+");
+                String name=tokens[0]+" "+tokens[1];
+                String date=tokens[2];
+
+                List<PersonFamily> toChange=persons.stream()
+                        .filter(x->x.birthay.equals(date)||x.name.equals(name))
+                        .collect(Collectors.toList());
+
+                if(toChange.isEmpty()){
+                    PersonFamily curMember=new PersonFamily();
+                    curMember.setName(name);
+                    curMember.setBirthay(date);
+                    persons.add(curMember);
+                }else if(toChange.size()==1){
+                    toChange.get(0).setName(name);
+                    toChange.get(0).setBirthay(date);
+                }else {
+                    PersonFamily first=toChange.get(0);
+                    PersonFamily sec=toChange.get(1);
+                    persons.remove(sec);
+
+                    if(first.name.equals("")){
+                        first.setName(sec.name);
+                    }else {
+                        first.setBirthay(sec.birthay);
+                    }
+
+                    first.parents.addAll(sec.parents);
+                    first.children.addAll(sec.children);
+                }
+            }
+            input=reader.readLine();
+        }
+
+        List<PersonFamily> fin=persons.stream()
+                .filter(x->x.name.equals(wantedPerson)||x.birthay.equals(wantedPerson))
+                .collect(Collectors.toList());
+
+        PersonFamily result=fin.get(0);
+        System.out.printf("%s %s%n",result.name,result.birthay);
+        System.out.println("Parents:");
+
+        result.parents.stream()
+                .forEach(p->{
+                    persons.stream()
+                            .filter(y->y.name.equals(p)||y.birthay.equals(p))
+                            .limit(1)
+                            .forEach(f-> System.out.printf("%s %s%n",f.name,f.birthay));
+                });
+        System.out.println("Children:");
+
+        result.children.stream()
+                .forEach(k->{
+                    persons.stream()
+                            .filter(p->p.name.equals(k)||p.birthay.equals(k))
+                            .limit(1)
+                            .forEach(f-> System.out.printf("%s %s%n",f.name,f.birthay));
+                });
+
+    }
+
+}
+class PersonFamily{
+    String name;
+    String birthay;
+    List<String> parents;
+    List<String> children;
+
+    public PersonFamily() {
+        this.name="";
+        this.birthay="";
+        this.parents=new ArrayList<>();
+        this.children=new ArrayList<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getBirthay() {
+        return birthay;
+    }
+
+    public void setBirthay(String birthay) {
+        this.birthay = birthay;
+    }
+}
+
+11.	** Cat Lady
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+public class _11_CatLady {
+    public static void main(String[] args) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+        List<Cat> cats=new ArrayList<>();
+
+        String input=reader.readLine();
+
+        while ("End".equals(input)==false){
+
+            String[] tokens=input.split("\\s+");
+
+            String breed=tokens[0];
+            String name=tokens[1];
+            double param=Double.parseDouble(tokens[2]);
+
+            Cat curCat=new Cat(name,breed);
+
+            if(breed.equals("StreetExtraordinaire")){
+                curCat.setDecibelsOfMeows(param);
+            }else if(breed.equals("Siamese")){
+                curCat.setEarSize(param);
+            }else {
+                curCat.setFurLenght(param);
+            }
+            cats.add(curCat);
+
+            input=reader.readLine();
+        }
+        String wantedCat=reader.readLine();
+
+        cats.stream()
+                .filter(c->c.getName().equals(wantedCat))
+                .limit(1)
+                .forEach(k->{
+                    k.printCat();
+                });
+
+    }
+}
+class Cat{
+    private String name;
+    private String breed;
+    private double earSize;
+    private double furLenght;
+    private double decibelsOfMeows;
+
+    public Cat(String name, String breed) {
+        this.name = name;
+        this.breed = breed;
+    }
+
+    public void printCat(){
+        double param=0;
+        if(this.furLenght!=0){
+            param=this.furLenght;
+        }else if(this.earSize!=0){
+            param=this.earSize;
+        }else {
+            param=this.decibelsOfMeows;
+        }
+        System.out.printf("%s %s %.2f%n",this.breed,this.name,param);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getEarSize() {
+        return earSize;
+    }
+
+    public void setEarSize(double earSize) {
+        this.earSize = earSize;
+    }
+
+    public double getFurLenght() {
+        return furLenght;
+    }
+
+    public void setFurLenght(double furLenght) {
+        this.furLenght = furLenght;
+    }
+
+    public double getDecibelsOfMeows() {
+        return decibelsOfMeows;
+    }
+
+    public void setDecibelsOfMeows(double decibelsOfMeows) {
+        this.decibelsOfMeows = decibelsOfMeows;
+    }
+}
+
