@@ -21,22 +21,9 @@ public class Book {
 
     protected void setAuthor(String author) {
 
-        if(author==null){
+        if(author==null||author.trim().matches("^[^\\s]+\\s+\\d+.*")){
             throw new IllegalArgumentException("Author not valid!");
         }
-        author=author.trim();
-        if(author.length()==0){
-            throw new IllegalArgumentException("Author not valid!");
-        }
-
-            String[] authorTokens=author.split("\\s+");
-
-                if(authorTokens.length>1&&Character.isDigit(authorTokens[1].charAt(0))){
-                    throw new IllegalArgumentException("Author not valid!");
-                }
-
-
-
 
         this.author = author;
     }
@@ -62,9 +49,10 @@ public class Book {
 
     @Override
     public String toString() {
-        final StringBuilder res=new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
-        res.append("Type: ").append(this.getClass().getSimpleName())
+        sb.append("Type: ").append(this.getClass().getSimpleName())
+
                 .append(System.lineSeparator())
                 .append("Title: ").append(this.getTitle())
                 .append(System.lineSeparator())
@@ -72,6 +60,7 @@ public class Book {
                 .append(System.lineSeparator())
                 .append("Price: ").append(this.getPrice())
                 .append(System.lineSeparator());
-        return res.toString();
+
+        return sb.toString();
     }
 }
